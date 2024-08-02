@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">DatabaseInAndroid</string>
+    <string name="app_name">ContentProviderClient</string>
     <string name="add_new_note">Add New Note</string>
     <string name="back_to_the_notes_app">Back to the Notes App</string>
     <string name="save_changes_and_back_to_notes_app">Save Changes and Back to Notes app</string>

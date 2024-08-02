@@ -1,36 +1,35 @@
 package com.example.contentproviderclient
 
-import android.database.Cursor
+import android.content.ContentResolver
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
-import com.example.contentproviderclient.AddNote
+
 
 class NotesAdapter(private var activity: FragmentActivity):RecyclerView.Adapter<NotesAdapter.NotesViewHolder>() {
     private var notesList: MutableList<Notes> = mutableListOf()
-    private var uri = Uri.parse("content://com.example.databasewithcontentprovider.notescontentprovider/notes_app")
-    private var cursor:Cursor? = null
+
     inner class NotesViewHolder(itemView: View):RecyclerView.ViewHolder(itemView)
     init {
-        cursor = activity.contentResolver.query(uri,null,null,null,null)
-        println("On Notes Adapter")
+        val cursor = activity.contentResolver.query(NotesConstants.CONTENT_URI,null,null,null,null)
         println(cursor)
         cursor?.use {
             while (it.moveToNext()){
                 notesList.add(
                     Notes(
-                        id = it.getInt(it.getColumnIndexOrThrow("id")),
-                        title = it.getString(it.getColumnIndexOrThrow("title")),
-                        content = it.getString(it.getColumnIndexOrThrow("content")),
-                        createdAt = it.getString(it.getColumnIndexOrThrow("created_at")),
-                        updatedAt = it.getString(it.getColumnIndexOrThrow("updated_at")),
-                        isPinned = it.getInt(it.getColumnIndexOrThrow("is_pinned"))
+                        id = it.getInt(it.getColumnIndexOrThrow(NotesConstants.COLUMN_ID)),
+                        title = it.getString(it.getColumnIndexOrThrow(NotesConstants.COLUMN_TITLE)),
+                        content = it.getString(it.getColumnIndexOrThrow(NotesConstants.COLUMN_CONTENT)),
+                        createdAt = it.getString(it.getColumnIndexOrThrow(NotesConstants.COLUMN_CREATED_AT)),
+                        updatedAt = it.getString(it.getColumnIndexOrThrow(NotesConstants.COLUMN_UPDATED_AT)),
+                        isPinned = it.getInt(it.getColumnIndexOrThrow(NotesConstants.COLUMN_IS_PINNED))
                     ))
                 println(notesList.toString())
             }
@@ -53,10 +52,10 @@ class NotesAdapter(private var activity: FragmentActivity):RecyclerView.Adapter<
             this.setOnClickListener {
                 val addNoteFragment = AddNote()
                 addNoteFragment.arguments = Bundle().apply {
-                    putInt("id",notesList[position].id)
-                    putString("title",notesList[position].title)
-                    putString("date",notesList[position].createdAt)
-                    putString("content",notesList[position].content)
+                    putInt(NotesConstants.COLUMN_ID,notesList[position].id)
+                    putString(NotesConstants.COLUMN_TITLE,notesList[position].title)
+                    putString(NotesConstants.COLUMN_CREATED_AT,notesList[position].createdAt)
+                    putString(NotesConstants.COLUMN_CONTENT,notesList[position].content)
                 }
                 Toast.makeText(context,"Message Clicked",Toast.LENGTH_SHORT).show()
                 activity.supportFragmentManager.beginTransaction()
@@ -64,8 +63,13 @@ class NotesAdapter(private var activity: FragmentActivity):RecyclerView.Adapter<
                     .addToBackStack("Note View")
                     .commit()
             }
+            findViewById<ImageButton>(R.id.deleteBtnList).setOnClickListener {
+                val contentResolver = activity.contentResolver
+                val uri = Uri.parse("${NotesConstants.CONTENT_URI}/${notesList[position].id}")
+                contentResolver.delete(uri,null,null)
+                notesList.removeAt(position)
+                notifyItemRemoved(position)
+            }
         }
     }
-
-
 }

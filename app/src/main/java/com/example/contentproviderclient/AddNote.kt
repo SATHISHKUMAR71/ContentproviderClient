@@ -47,10 +47,10 @@ class AddNote : Fragment() {
         date.text = LocalDate.now().toString()
         if(arguments!=null){
             arguments?.let {
-                title.setText(it.getString("title"))
-                content.setText(it.getString("content"))
-                date.text = (it.getString("date"))
-                noteId = it.getInt("id")
+                title.setText(it.getString(NotesConstants.COLUMN_TITLE))
+                content.setText(it.getString(NotesConstants.COLUMN_CONTENT))
+                date.text = (it.getString(NotesConstants.COLUMN_CREATED_AT))
+                noteId = it.getInt(NotesConstants.COLUMN_ID)
                 note = Notes(noteId,title.text.toString(),content.text.toString(),LocalDate.now().toString(),LocalDate.now().toString(),0)
             }
         }
@@ -62,7 +62,7 @@ class AddNote : Fragment() {
                 note = Notes(0,title.text.toString(),content.text.toString(),LocalDate.now().toString(),LocalDate.now().toString(),0)
 //                Insert Operation
                 val contentResolver = requireActivity().contentResolver
-                val uri = Uri.parse("content://com.example.databasewithcontentprovider.notescontentprovider/notes_app/${note.id}")
+
                 val values = ContentValues().apply {
                     put(COLUMN_TITLE,note.title)
                     put(COLUMN_CONTENT,note.content)
@@ -70,13 +70,13 @@ class AddNote : Fragment() {
                     put(COLUMN_IS_PINNED,note.isPinned)
                     put(COLUMN_UPDATED_AT,note.updatedAt)
                 }
-                contentResolver.insert(uri,values)
+                contentResolver.insert(NotesConstants.CONTENT_URI,values)
             }
             else{
                 note = Notes(noteId,title.text.toString(),content.text.toString(),LocalDate.now().toString(),LocalDate.now().toString(),0)
 //                Update Operation
                 val contentResolver = requireActivity().contentResolver
-                val uri = Uri.parse("content://com.example.databasewithcontentprovider.notescontentprovider/notes_app/${note.id}")
+                val uri = Uri.parse("${NotesConstants.CONTENT_URI}/${note.id}")
                 val values = ContentValues().apply {
                     put(COLUMN_TITLE,note.title)
                     put(COLUMN_CONTENT,note.content)
@@ -92,7 +92,7 @@ class AddNote : Fragment() {
         view.findViewById<ImageButton>(R.id.deleteNote).setOnClickListener {
 //            Delete Operation
             val contentResolver = requireActivity().contentResolver
-            val uri = Uri.parse("content://com.example.databasewithcontentprovider.notescontentprovider/notes_app/${note.id}")
+            val uri = Uri.parse("${NotesConstants.CONTENT_URI}/${note.id}")
             contentResolver.delete(uri,null,null)
             parentFragmentManager.popBackStack()
             Toast.makeText(context,"Notes Deleted Successfully",Toast.LENGTH_SHORT).show()
